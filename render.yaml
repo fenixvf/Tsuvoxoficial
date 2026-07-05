@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: tsuvox
+    runtime: python
+    buildCommand: pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
+    startCommand: python app.py
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: PYTHON_VERSION
+        value: 3.12.0

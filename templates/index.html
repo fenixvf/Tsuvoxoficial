@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>TsuVox – Separador de Vocais</title>
+  <link rel="icon" type="image/png" href="/static/favicon.png" />
+  <link rel="apple-touch-icon" href="/static/favicon.png" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-inner">
+        <div class="logo">
+          <svg class="logo-icon" viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="20" fill="#6C63FF"/>
+            <path d="M12 20 Q16 10 20 20 Q24 30 28 20" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+            <circle cx="20" cy="20" r="3" fill="white"/>
+          </svg>
+          <span class="logo-text">Tsu<span class="logo-accent">Vox</span></span>
+        </div>
+        <p class="header-sub">Separador de vocais com IA</p>
+      </div>
+    </header>
+
+    <main class="main">
+      <!-- Upload Card -->
+      <section class="card" id="upload-section">
+        <h2 class="card-title">🎵 Enviar Áudio</h2>
+
+        <!-- Drop Zone -->
+        <div class="dropzone" id="dropzone">
+          <input type="file" id="file-input" accept=".mp3,.wav,.flac,.ogg,.m4a,.aac,.wma,.aiff" hidden />
+          <div class="drop-icon">🎧</div>
+          <p class="drop-text">Arraste um arquivo aqui</p>
+          <p class="drop-sub">ou</p>
+          <button class="btn btn-outline" onclick="document.getElementById('file-input').click()">
+            Escolher arquivo
+          </button>
+          <p class="drop-formats">MP3, WAV, FLAC, OGG, M4A, AAC — até 200MB</p>
+        </div>
+
+        <!-- File Preview -->
+        <div class="file-preview hidden" id="file-preview">
+          <div class="file-info">
+            <span class="file-icon">🎼</span>
+            <div>
+              <p class="file-name" id="file-name">arquivo.mp3</p>
+              <p class="file-size" id="file-size">0 MB</p>
+            </div>
+            <button class="btn-remove" onclick="clearFile()" title="Remover">✕</button>
+          </div>
+        </div>
+
+        <!-- Options -->
+        <div class="options">
+          <div class="option-group">
+            <label class="option-label">Modo de separação</label>
+            <div class="radio-group" id="stems-group">
+              <label class="radio-card active" data-value="vocals">
+                <input type="radio" name="stems" value="vocals" checked hidden/>
+                <span class="radio-icon">🎤</span>
+                <span class="radio-title">Vocal / Instrumental</span>
+                <span class="radio-desc">Separa a voz do fundo musical</span>
+              </label>
+              <label class="radio-card" data-value="all">
+                <input type="radio" name="stems" value="all" hidden/>
+                <span class="radio-icon">🥁</span>
+                <span class="radio-title">4 Faixas</span>
+                <span class="radio-desc">Vocal, bateria, baixo e outros</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="option-group">
+            <label class="option-label">Modelo de IA</label>
+            <select class="select" id="model-select">
+              <option value="htdemucs">HTDemucs — Recomendado</option>
+              <option value="htdemucs_ft">HTDemucs FT — Alta qualidade (lento)</option>
+              <option value="mdx_extra">MDX Extra — Melhor para vocal isolado</option>
+              <option value="mdx_extra_q">MDX Extra Q — Qualidade máxima (lento)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Process Button -->
+        <button class="btn btn-primary" id="process-btn" onclick="startProcessing()" disabled>
+          <span class="btn-text">Separar Áudio</span>
+          <span class="btn-icon">✨</span>
+        </button>
+      </section>
+
+      <!-- Progress Card -->
+      <section class="card hidden" id="progress-section">
+        <h2 class="card-title">⚙️ Processando</h2>
+        <div class="progress-info">
+          <p class="progress-file" id="progress-file"></p>
+          <p class="progress-msg" id="progress-msg">Iniciando...</p>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+        </div>
+        <p class="progress-note">
+          A separação pode levar de 1 a 10 minutos dependendo do tamanho do arquivo e do modelo escolhido.
+        </p>
+        <button class="btn btn-ghost" onclick="cancelProcessing()">Cancelar</button>
+      </section>
+
+      <!-- Results Card -->
+      <section class="card hidden" id="results-section">
+        <h2 class="card-title">✅ Pronto!</h2>
+        <p class="results-sub" id="results-sub"></p>
+
+        <div class="stems-grid" id="stems-grid">
+          <!-- Stem cards injected by JS -->
+        </div>
+
+        <div class="results-actions">
+          <button class="btn btn-primary" id="download-all-btn" onclick="downloadAll()">
+            <span>⬇️ Baixar tudo (.zip)</span>
+          </button>
+          <button class="btn btn-ghost" onclick="resetApp()">Separar outro arquivo</button>
+        </div>
+      </section>
+
+      <!-- Error Card -->
+      <section class="card hidden" id="error-section">
+        <h2 class="card-title">❌ Erro</h2>
+        <p class="error-msg" id="error-msg"></p>
+        <button class="btn btn-ghost" onclick="resetApp()">Tentar novamente</button>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>Powered by <strong>Demucs</strong> · <a href="https://github.com/Anjok07/ultimatevocalremovergui" target="_blank">UVR</a></p>
+    </footer>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

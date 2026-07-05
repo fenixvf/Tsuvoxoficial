@@ -1,0 +1,50 @@
+# Arquivos temporários de processamento
+temp/
+outputs/
+
+# Modelos de IA (baixados automaticamente)
+models/
+*.pth
+*.ckpt
+*.pt
+
+# Arquivos de áudio grandes
+*.wav
+*.mp3
+*.flac
+*.ogg
+*.aac
+
+# Arquivos comprimidos de saída
+*.zip
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+venv/
+env/
+.venv/
+
+# Replit
+.replit
+replit.nix
+.config/
+.cache/
+.upm/
+
+# Uploads temporários
+uploads/
+
+# Assets de testes/screenshots
+attached_assets/
+
+# OS
+.DS_Store
+Thumbs.db
