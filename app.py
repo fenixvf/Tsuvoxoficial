@@ -1,6 +1,13 @@
 import os
 import sys
 import uuid
+
+# Cache Demucs/PyTorch models to persistent disk (Render disk at /var/data)
+_cache_dir = '/var/data/torch_cache'
+if os.path.isdir('/var/data'):
+    os.makedirs(_cache_dir, exist_ok=True)
+    os.environ.setdefault('TORCH_HOME', _cache_dir)
+    os.environ.setdefault('XDG_CACHE_HOME', '/var/data/cache')
 import threading
 import time
 import json
@@ -51,10 +58,19 @@ def run_separation(job_id, input_path, model, stems):
         output_job_dir_abs = output_job_dir.resolve()
 
         runner = str(Path(__file__).parent.resolve() / 'web_demucs_runner.py')
+
+        # Number of parallel jobs — use available CPUs, min 1 max 4
+        n_jobs = min(max(os.cpu_count() or 1, 1), 4)
+
         cmd = [
             sys.executable, runner,
             '--out', str(output_job_dir_abs),
             '-n', model,
+            '--shifts', '0',      # no test-time augmentation → muito mais rápido
+            '--overlap', '0.1',   # sobreposição mínima (padrão 0.25) → ~20% mais rápido
+            '--jobs', str(n_jobs),  # processamento paralelo por segmento
+            '--mp3',              # saída MP3 (5x menor, I/O muito mais rápido)
+            '--mp3-bitrate', '320',
         ]
 
         if stems == 'vocals':
@@ -121,8 +137,8 @@ def run_separation(job_id, input_path, model, stems):
                     output_files[stem_name] = str(f)
         
         if not output_files:
-            # Scan recursively
-            for f in output_job_dir.rglob('*.wav'):
+            # Scan recursively for wav or mp3
+            for f in list(output_job_dir.rglob('*.wav')) + list(output_job_dir.rglob('*.mp3')):
                 stem_name = f.stem
                 output_files[stem_name] = str(f)
 
@@ -132,9 +148,10 @@ def run_separation(job_id, input_path, model, stems):
 
         # Create zip of all outputs
         zip_path = output_job_dir / f'{base_name}_separated.zip'
-        with zipfile.ZipFile(zip_path, 'w') as zf:
+        with zipfile.ZipFile(zip_path, 'w', compression=zipfile.ZIP_STORED) as zf:
             for stem_name, fpath in output_files.items():
-                zf.write(fpath, f'{base_name}_{stem_name}.wav')
+                ext = Path(fpath).suffix  # .mp3 or .wav
+                zf.write(fpath, f'{base_name}_{stem_name}{ext}')
 
         update_job(
             job_id,

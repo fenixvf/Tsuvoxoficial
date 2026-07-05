@@ -9,3 +9,11 @@ services:
         value: 5000
       - key: PYTHON_VERSION
         value: 3.12.0
+      - key: TORCH_HOME
+        value: /var/data/torch_cache
+      - key: XDG_CACHE_HOME
+        value: /var/data/cache
+    disk:
+      name: tsuvox-cache
+      mountPath: /var/data
+      sizeGB: 5
